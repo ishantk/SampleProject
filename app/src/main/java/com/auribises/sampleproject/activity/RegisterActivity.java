@@ -83,6 +83,7 @@ public class RegisterActivity extends AppCompatActivity{
 
     void registerUserOnServer(){
 
+
         stringRequest = new StringRequest(Request.Method.POST, Util.REGISTER_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
