@@ -52,6 +52,8 @@ public class RegisterActivity extends AppCompatActivity{
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
 
+    boolean updateMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +70,18 @@ public class RegisterActivity extends AppCompatActivity{
         preferences = getSharedPreferences(Util.PREFS_NAME,MODE_PRIVATE);
         editor = preferences.edit();
 
+
+        Intent rcv = getIntent();
+        updateMode = rcv.hasExtra(Util.KEY_USER);
+
+        if(updateMode){
+            user = (User)rcv.getSerializableExtra(Util.KEY_USER);
+            eTxtName.setText(user.getName());
+            eTxtEmail.setText(user.getEmail());
+            eTxtPassword.setText(user.getPassword());
+            btnRegister.setText("Update User");
+        }
+
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,8 +97,16 @@ public class RegisterActivity extends AppCompatActivity{
 
     void registerUserOnServer(){
 
+        String url = "";
 
-        stringRequest = new StringRequest(Request.Method.POST, Util.REGISTER_ENDPOINT, new Response.Listener<String>() {
+        if(updateMode){
+            url = Util.UPDATE_ENDPOINT;
+        }else{
+            url = Util.REGISTER_ENDPOINT;
+        }
+
+
+        stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 
@@ -98,12 +120,17 @@ public class RegisterActivity extends AppCompatActivity{
 
                     if(success == 1){
 
-                        editor.putBoolean(Util.KEY_LOGREG,true);
-                        editor.commit();
+                        if(!updateMode) {
+                            editor.putBoolean(Util.KEY_LOGREG, true);
+                            editor.commit();
 
-                        Intent intent = new Intent(RegisterActivity.this,HomeActivity.class);
-                        startActivity(intent);
-                        finish();
+
+                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }else{
+                            finish();
+                        }
                     }
 
                 }catch (Exception e){
@@ -122,6 +149,10 @@ public class RegisterActivity extends AppCompatActivity{
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String,String> map = new HashMap<>();
+
+                if(updateMode){
+                    map.put("id",String.valueOf(user.getUid()));
+                }
 
                 map.put("name",user.getName());
                 map.put("email",user.getEmail());

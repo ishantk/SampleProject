@@ -1,10 +1,12 @@
 package com.auribises.sampleproject.model;
 
+import java.io.Serializable;
+
 /**
  * Created by ishantkumar on 15/09/17.
  */
 
-public class User {
+public class User implements Serializable{
 
     int uid;
     String name;
